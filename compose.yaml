@@ -1,0 +1,52 @@
+name: pa3
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-replay}
+      POSTGRES_USER: ${POSTGRES_USER:-replay}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-replay}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-replay} -d ${POSTGRES_DB:-replay}']
+      interval: 5s
+      retries: 10
+
+  backend:
+    build: ./docker/backend
+    # Ces variables priment sur backend/.env : dans Docker la base s'appelle "db".
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-replay}
+      DB_USERNAME: ${POSTGRES_USER:-replay}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-replay}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+    volumes:
+      - ./backend:/app
+    ports:
+      - '${BACKEND_PORT:-8000}:8000'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./docker/frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+      # Les volumes montes n'emettent pas d'evenements fichier sur macOS et Windows.
+      VITE_USE_POLLING: '1'
+    volumes:
+      - ./frontend:/app
+      - frontend-modules:/app/node_modules
+    ports:
+      - '${FRONTEND_PORT:-5173}:5173'
+
+volumes:
+  db-data:
+  frontend-modules:
