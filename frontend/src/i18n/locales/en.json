@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "title": "Replay — Discover, rate and archive your games",
+    "description": "Replay is the logbook for players: discover games, rate your playthroughs and keep track of everything you have played."
+  },
+  "common": {
+    "soon": "Coming soon",
+    "skipToContent": "Skip to main content",
+    "coverAlt": "{game} cover art"
+  },
+  "navbar": {
+    "brandTagline": "Game journal",
+    "home": "Home",
+    "explore": "Explore",
+    "journal": "Journal",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "languageSwitch": "Change language",
+    "primaryNav": "Main navigation"
+  },
+  "hero": {
+    "eyebrow": "Discover · Rate · Archive",
+    "titleStart": "Discover, rate and archive",
+    "titleEmphasis": "the games that shape you",
+    "lead": "A living library where every game is treated as a work of its own. Build your player journal, one playthrough at a time.",
+    "ctaPrimary": "Start my journal",
+    "ctaSecondary": "Browse games",
+    "coversLabel": "A selection of video game covers"
+  },
+  "marquee": {
+    "words": "Discover · Rate · Archive · Replay"
+  },
+  "discovery": {
+    "eyebrow": "Featured",
+    "title": "A curated shelf",
+    "lead": "A few titles to set the tone. The full catalogue will land with the video game API.",
+    "featured": "Spotlight",
+    "ratingLabel": "Average rating",
+    "noRating": "Not rated yet",
+    "releasedIn": "Released in {year}"
+  },
+  "concept": {
+    "eyebrow": "The idea",
+    "title": "Your player memory, finally organised",
+    "items": {
+      "discover": {
+        "title": "Discover games",
+        "description": "Carefully edited pages to explore titles by taste rather than by algorithm."
+      },
+      "rate": {
+        "title": "Rate your playthroughs",
+        "description": "A score, a few words, and the memory of a session stays attached to the game for good."
+      },
+      "journal": {
+        "title": "Build your journal",
+        "description": "Every session joins a personal timeline that tells the story of your year in games."
+      },
+      "revisit": {
+        "title": "Find your games again",
+        "description": "Finished, dropped, waiting to be resumed: your library stays clear and searchable."
+      }
+    }
+  },
+  "footer": {
+    "tagline": "The logbook for players.",
+    "navTitle": "Navigation",
+    "projectTitle": "Project",
+    "projectSchool": "Student project — PA_3",
+    "projectStatus": "Work in progress",
+    "coversNotice": "Official cover art shown for demonstration purposes until the video game API is connected.",
+    "rights": "© {year} Replay — non-commercial student project."
+  }
+}

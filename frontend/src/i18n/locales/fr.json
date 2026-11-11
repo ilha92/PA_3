@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "title": "Replay — Découvrez, notez et archivez vos jeux vidéo",
+    "description": "Replay est le journal de bord des joueurs : découvrez des jeux, notez vos parties et gardez la trace de tout ce que vous avez joué."
+  },
+  "common": {
+    "soon": "Bientôt disponible",
+    "skipToContent": "Aller au contenu principal",
+    "coverAlt": "Jaquette de {game}"
+  },
+  "navbar": {
+    "brandTagline": "Journal de jeu",
+    "home": "Accueil",
+    "explore": "Explorer",
+    "journal": "Journal",
+    "signIn": "Connexion",
+    "signUp": "Inscription",
+    "languageSwitch": "Changer de langue",
+    "primaryNav": "Navigation principale"
+  },
+  "hero": {
+    "eyebrow": "Découvrir · Noter · Archiver",
+    "titleStart": "Découvrez, notez et archivez",
+    "titleEmphasis": "les jeux qui vous marquent",
+    "lead": "Une bibliothèque vivante où chaque jeu est présenté comme une œuvre. Construisez votre journal de joueur, partie après partie.",
+    "ctaPrimary": "Commencer mon journal",
+    "ctaSecondary": "Parcourir les jeux",
+    "coversLabel": "Sélection de jaquettes de jeux vidéo"
+  },
+  "marquee": {
+    "words": "Découvrir · Noter · Archiver · Rejouer"
+  },
+  "discovery": {
+    "eyebrow": "À la une",
+    "title": "Une sélection en vitrine",
+    "lead": "Quelques titres mis en avant pour donner le ton. Le catalogue complet arrivera avec l'API de jeux vidéo.",
+    "featured": "Coup de projecteur",
+    "ratingLabel": "Note moyenne",
+    "noRating": "Pas encore noté",
+    "releasedIn": "Sorti en {year}"
+  },
+  "concept": {
+    "eyebrow": "Le principe",
+    "title": "Votre mémoire de joueur, enfin rangée",
+    "items": {
+      "discover": {
+        "title": "Découvrir des jeux",
+        "description": "Des fiches éditoriales soignées pour explorer des titres selon vos envies plutôt que selon un algorithme."
+      },
+      "rate": {
+        "title": "Noter ses expériences",
+        "description": "Une note, quelques mots, et le souvenir d'une partie reste attaché au jeu pour de bon."
+      },
+      "journal": {
+        "title": "Construire son journal",
+        "description": "Chaque session rejoint une chronologie personnelle qui raconte votre année de jeu."
+      },
+      "revisit": {
+        "title": "Retrouver ses jeux",
+        "description": "Terminés, abandonnés, à reprendre : votre bibliothèque reste claire et consultable."
+      }
+    }
+  },
+  "footer": {
+    "tagline": "Le journal de bord des joueurs.",
+    "navTitle": "Navigation",
+    "projectTitle": "Projet",
+    "projectSchool": "Projet étudiant — PA_3",
+    "projectStatus": "Version de travail",
+    "coversNotice": "Jaquettes officielles utilisées à titre de démonstration, en attendant l'intégration de l'API de jeux vidéo.",
+    "rights": "© {year} Replay — projet étudiant sans but commercial."
+  }
+}
