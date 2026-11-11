@@ -1,0 +1,14 @@
+.DS_Store
+
+# Dependances et artefacts de build
+node_modules/
+vendor/
+dist/
+
+# Variables d'environnement
+.env
+.env.*
+!.env.example
+
+# Dossier de travail local (captures, references)
+.scratch/
