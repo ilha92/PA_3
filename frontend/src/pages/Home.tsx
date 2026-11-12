@@ -32,7 +32,7 @@ export function Home() {
       <main id="main">
         <Hero games={getHeroGames()} />
         <Marquee />
-        <Discovery games={getFeaturedGames()} />
+        <Discovery games={getHeroGames()} />
         <Concept games={getFeaturedGames()} />
       </main>
 

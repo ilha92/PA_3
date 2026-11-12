@@ -37,7 +37,16 @@
     "featured": "Coup de projecteur",
     "ratingLabel": "Note moyenne",
     "noRating": "Pas encore noté",
-    "releasedIn": "Sorti en {year}"
+    "releasedIn": "Sorti en {year}",
+    "searchLabel": "Rechercher un jeu par nom, genre ou identifiant",
+    "searchPlaceholder": "Saisis un titre, un genre ou un identifiant",
+    "sortAlgorithm": "Algorithme de tri",
+    "insertionSort": "Tri par insertion",
+    "quickSort": "Tri rapide",
+    "mergeSort": "Tri fusion",
+    "resultCount": "{count} résultat(s)",
+    "sortDuration": "Temps de tri : {duration} ms",
+    "noResults": "Aucun jeu trouvé. Essaie une autre recherche."
   },
   "concept": {
     "eyebrow": "Le principe",

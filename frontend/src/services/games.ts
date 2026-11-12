@@ -1,4 +1,10 @@
 import { games } from '../data/games'
+import {
+  insertionSort,
+  mergeSort,
+  quickSort,
+  type SortAlgorithm,
+} from '../algorithms/sorting'
 import type { Game } from '../types/game'
 
 /**
@@ -13,4 +19,22 @@ export function getHeroGames(): Game[] {
 
 export function getFeaturedGames(): Game[] {
   return games.slice(0, 6)
+}
+
+export function sortGames(
+  gameList: Game[],
+  algorithm: SortAlgorithm,
+  locale: string,
+): Game[] {
+  const compareByTitle = (firstGame: Game, secondGame: Game) =>
+    firstGame.title.localeCompare(secondGame.title, locale, { sensitivity: 'base' })
+
+  switch (algorithm) {
+    case 'quick':
+      return quickSort(gameList, compareByTitle)
+    case 'merge':
+      return mergeSort(gameList, compareByTitle)
+    default:
+      return insertionSort(gameList, compareByTitle)
+  }
 }
