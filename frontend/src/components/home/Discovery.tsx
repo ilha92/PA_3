@@ -1,5 +1,8 @@
-import { For, Show } from 'solid-js'
+import { createEffect, createSignal, For, Show } from 'solid-js'
 import { useI18n } from '../../i18n'
+import { searchGames } from '../../algorithms/search'
+import { sortGames } from '../../services/games'
+import type { SortAlgorithm } from '../../algorithms/sorting'
 import type { Game } from '../../types/game'
 import { GameCard } from '../ui/GameCard'
 import { GameCover } from '../ui/GameCover'
@@ -10,13 +13,27 @@ type DiscoveryProps = {
 
 export function Discovery(props: DiscoveryProps) {
   const { locale, t } = useI18n()
-  const featured = () => props.games[0]
-  const rest = () => props.games.slice(1)
+  const [query, setQuery] = createSignal('')
+  const [algorithm, setAlgorithm] = createSignal<SortAlgorithm>('insertion')
+  const [sortSelected, setSortSelected] = createSignal(false)
+  const [results, setResults] = createSignal<Game[]>([])
+  const [sortingTime, setSortingTime] = createSignal(0)
+  const showResults = () => query().trim() !== '' || sortSelected()
+  const featured = () => (showResults() ? undefined : props.games[0])
+  const rest = () => (showResults() ? results() : props.games.slice(1, 6))
   const featuredRating = () =>
     featured()?.rating?.toLocaleString(locale(), {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
     })
+
+  createEffect(() => {
+    const matchingGames = searchGames(props.games, query(), locale())
+    const startTime = performance.now()
+    const sortedGames = sortGames(matchingGames, algorithm(), locale())
+    setSortingTime(performance.now() - startTime)
+    setResults(sortedGames)
+  })
 
   return (
     <section class="shell py-24 md:py-32">
@@ -29,6 +46,43 @@ export function Discovery(props: DiscoveryProps) {
         </div>
         <p class="text-mist max-w-xs text-sm/relaxed">{t('discovery.lead')}</p>
       </header>
+
+      <div class="mt-8 grid gap-4 md:grid-cols-[minmax(0,1fr)_16rem] md:items-end">
+        <label class="text-mist block text-sm font-medium">
+          {t('discovery.searchLabel')}
+          <input
+            type="search"
+            value={query()}
+            onInput={(event) => setQuery(event.currentTarget.value)}
+            placeholder={t('discovery.searchPlaceholder')}
+            class="bg-deep border-edge focus:border-aqua mt-2 w-full rounded-md border px-4 py-3 outline-none transition"
+          />
+        </label>
+        <label class="text-mist block text-sm font-medium">
+          {t('discovery.sortAlgorithm')}
+          <select
+            value={algorithm()}
+            onChange={(event) => {
+              setAlgorithm(event.currentTarget.value as SortAlgorithm)
+              setSortSelected(true)
+            }}
+            class="bg-deep border-edge focus:border-aqua mt-2 w-full rounded-md border px-4 py-3 outline-none transition"
+          >
+            <option value="insertion">{t('discovery.insertionSort')}</option>
+            <option value="quick">{t('discovery.quickSort')}</option>
+            <option value="merge">{t('discovery.mergeSort')}</option>
+          </select>
+        </label>
+      </div>
+
+      <Show when={showResults()}>
+        <p class="text-mist/60 mt-3 text-sm" role="status" aria-live="polite">
+          {t('discovery.resultCount', { count: results().length })}
+        </p>
+        <p class="text-mist/60 mt-1 text-sm" aria-live="polite">
+          {t('discovery.sortDuration', { duration: sortingTime().toFixed(3) })}
+        </p>
+      </Show>
 
       <Show when={featured()}>
         {(game) => (
@@ -72,11 +126,17 @@ export function Discovery(props: DiscoveryProps) {
         <For each={rest()}>
           {(game, index) => (
             <li>
-              <GameCard game={game} index={index() + 2} />
+              <GameCard game={game} index={index() + (showResults() ? 1 : 2)} />
             </li>
           )}
         </For>
       </ul>
+
+      <Show when={showResults() && results().length === 0}>
+        <p class="text-mist mt-12 text-center" role="status">
+          {t('discovery.noResults')}
+        </p>
+      </Show>
     </section>
   )
 }

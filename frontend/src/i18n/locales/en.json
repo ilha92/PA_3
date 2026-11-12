@@ -37,7 +37,16 @@
     "featured": "Spotlight",
     "ratingLabel": "Average rating",
     "noRating": "Not rated yet",
-    "releasedIn": "Released in {year}"
+    "releasedIn": "Released in {year}",
+    "searchLabel": "Search games by title, genre or ID",
+    "searchPlaceholder": "Enter a title, genre or ID",
+    "sortAlgorithm": "Sorting algorithm",
+    "insertionSort": "Insertion sort",
+    "quickSort": "Quick sort",
+    "mergeSort": "Merge sort",
+    "resultCount": "{count} result(s)",
+    "sortDuration": "Sort time: {duration} ms",
+    "noResults": "No games found. Try another search."
   },
   "concept": {
     "eyebrow": "The idea",
