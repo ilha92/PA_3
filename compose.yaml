@@ -17,7 +17,9 @@ services:
       retries: 10
 
   backend:
-    build: ./docker/backend
+    build:
+      context: .
+      target: backend
     # Ces variables priment sur backend/.env : dans Docker la base s'appelle "db".
     environment:
       DB_CONNECTION: pgsql
@@ -36,7 +38,9 @@ services:
         condition: service_healthy
 
   frontend:
-    build: ./docker/frontend
+    build:
+      context: .
+      target: frontend
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
       # Les volumes montes n'emettent pas d'evenements fichier sur macOS et Windows.
