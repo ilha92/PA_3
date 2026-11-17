@@ -1,13 +1,13 @@
 import { A, useNavigate, useParams } from '@solidjs/router'
-import { For, Show } from 'solid-js'
-import { games } from '../data/games'
+import { createResource, For, Show } from 'solid-js'
 import { Footer } from '../components/layout/Footer'
 import { Navbar } from '../components/layout/Navbar'
+import { getGameBySlug } from '../services/games'
 
 export function JeuxDetail() {
   const navigate = useNavigate()
   const params = useParams<{ slug: string }>()
-  const game = () => games.find((item) => item.slug === params.slug)
+  const [game] = createResource(() => params.slug, getGameBySlug)
 
   return (
     <>
@@ -17,7 +17,13 @@ export function JeuxDetail() {
           when={game()}
           fallback={
             <section>
-              <h1 class="font-display text-3xl font-bold">Jeu introuvable</h1>
+              <h1 class="font-display text-3xl font-bold">
+                {game.loading
+                  ? 'Chargement du jeu...'
+                  : game.error
+                    ? 'Impossible de charger le jeu.'
+                    : 'Jeu introuvable'}
+              </h1>
               <A href="/" class="text-aqua mt-6 inline-block underline">
                 Retour à l’accueil
               </A>

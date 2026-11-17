@@ -33,20 +33,22 @@
   "discovery": {
     "eyebrow": "À la une",
     "title": "Une sélection en vitrine",
-    "lead": "Quelques titres mis en avant pour donner le ton. Le catalogue complet arrivera avec l'API de jeux vidéo.",
+    "lead": "Parcours le catalogue, recherche un jeu par son nom ou trie les titres.",
     "featured": "Coup de projecteur",
     "ratingLabel": "Note moyenne",
     "noRating": "Pas encore noté",
     "releasedIn": "Sorti en {year}",
-    "searchLabel": "Rechercher un jeu par nom, genre ou identifiant",
-    "searchPlaceholder": "Saisis un titre, un genre ou un identifiant",
+    "searchLabel": "Rechercher un jeu par nom",
+    "searchPlaceholder": "Saisis un titre",
     "sortAlgorithm": "Algorithme de tri",
     "insertionSort": "Tri par insertion",
     "quickSort": "Tri rapide",
     "mergeSort": "Tri fusion",
     "resultCount": "{count} résultat(s)",
     "sortDuration": "Temps de tri : {duration} ms",
-    "noResults": "Aucun jeu trouvé. Essaie une autre recherche."
+    "noResults": "Aucun jeu trouvé. Essaie une autre recherche.",
+    "searching": "Recherche en cours...",
+    "searchError": "La recherche est momentanément indisponible. Réessaie plus tard."
   },
   "concept": {
     "eyebrow": "Le principe",
@@ -70,13 +72,17 @@
       }
     }
   },
+  "catalog": {
+    "loading": "Chargement du catalogue...",
+    "error": "Impossible de charger les jeux. Vérifie que le serveur backend est démarré."
+  },
   "footer": {
     "tagline": "Le journal de bord des joueurs.",
     "navTitle": "Navigation",
     "projectTitle": "Projet",
     "projectSchool": "Projet étudiant — PA_3",
     "projectStatus": "Version de travail",
-    "coversNotice": "Jaquettes officielles utilisées à titre de démonstration, en attendant l'intégration de l'API de jeux vidéo.",
+    "coversNotice": "Jaquettes officielles utilisées à titre de démonstration.",
     "rights": "© {year} Replay — projet étudiant sans but commercial."
   }
 }

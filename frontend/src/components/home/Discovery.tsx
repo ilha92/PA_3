@@ -1,7 +1,6 @@
-import { createEffect, createSignal, For, Show } from 'solid-js'
+import { createEffect, createSignal, For, onCleanup, Show } from 'solid-js'
 import { useI18n } from '../../i18n'
-import { searchGames } from '../../algorithms/search'
-import { sortGames } from '../../services/games'
+import { searchGamesFromApi, sortGames } from '../../services/games'
 import type { SortAlgorithm } from '../../algorithms/sorting'
 import type { Game } from '../../types/game'
 import { GameCard } from '../ui/GameCard'
@@ -18,6 +17,8 @@ export function Discovery(props: DiscoveryProps) {
   const [sortSelected, setSortSelected] = createSignal(false)
   const [results, setResults] = createSignal<Game[]>([])
   const [sortingTime, setSortingTime] = createSignal(0)
+  const [isSearching, setIsSearching] = createSignal(false)
+  const [searchFailed, setSearchFailed] = createSignal(false)
   const showResults = () => query().trim() !== '' || sortSelected()
   const featured = () => (showResults() ? undefined : props.games[0])
   const rest = () => (showResults() ? results() : props.games.slice(1, 6))
@@ -28,11 +29,41 @@ export function Discovery(props: DiscoveryProps) {
     })
 
   createEffect(() => {
-    const matchingGames = searchGames(props.games, query(), locale())
+    const currentQuery = query().trim()
+    const currentLocale = locale()
+    const currentAlgorithm = algorithm()
     const startTime = performance.now()
-    const sortedGames = sortGames(matchingGames, algorithm(), locale())
-    setSortingTime(performance.now() - startTime)
-    setResults(sortedGames)
+
+    if (!currentQuery) {
+      const sortedGames = sortGames(props.games, currentAlgorithm, currentLocale)
+      setSortingTime(performance.now() - startTime)
+      setResults(sortedGames)
+      setIsSearching(false)
+      setSearchFailed(false)
+      return
+    }
+
+    const controller = new AbortController()
+    setIsSearching(true)
+    setSearchFailed(false)
+
+    searchGamesFromApi(currentQuery, controller.signal)
+      .then((matchingGames) => {
+        const sortedGames = sortGames(matchingGames, currentAlgorithm, currentLocale)
+        setSortingTime(performance.now() - startTime)
+        setResults(sortedGames)
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setResults([])
+          setSearchFailed(true)
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsSearching(false)
+      })
+
+    onCleanup(() => controller.abort())
   })
 
   return (
@@ -76,9 +107,16 @@ export function Discovery(props: DiscoveryProps) {
       </div>
 
       <Show when={showResults()}>
-        <p class="text-mist/60 mt-3 text-sm" role="status" aria-live="polite">
-          {t('discovery.resultCount', { count: results().length })}
-        </p>
+        <Show when={isSearching()}>
+          <p class="text-mist/60 mt-3 text-sm" role="status" aria-live="polite">
+            {t('discovery.searching')}
+          </p>
+        </Show>
+        <Show when={!isSearching() && !searchFailed()}>
+          <p class="text-mist/60 mt-3 text-sm" role="status" aria-live="polite">
+            {t('discovery.resultCount', { count: results().length })}
+          </p>
+        </Show>
         <p class="text-mist/60 mt-1 text-sm" aria-live="polite">
           {t('discovery.sortDuration', { duration: sortingTime().toFixed(3) })}
         </p>
@@ -132,9 +170,14 @@ export function Discovery(props: DiscoveryProps) {
         </For>
       </ul>
 
-      <Show when={showResults() && results().length === 0}>
+      <Show when={showResults() && !isSearching() && !searchFailed() && results().length === 0}>
         <p class="text-mist mt-12 text-center" role="status">
           {t('discovery.noResults')}
+        </p>
+      </Show>
+      <Show when={showResults() && searchFailed()}>
+        <p class="text-mist mt-12 text-center" role="alert">
+          {t('discovery.searchError')}
         </p>
       </Show>
     </section>

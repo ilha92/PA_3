@@ -33,20 +33,22 @@
   "discovery": {
     "eyebrow": "Featured",
     "title": "A curated shelf",
-    "lead": "A few titles to set the tone. The full catalogue will land with the video game API.",
+    "lead": "Browse the catalogue, search games by title, or sort the list.",
     "featured": "Spotlight",
     "ratingLabel": "Average rating",
     "noRating": "Not rated yet",
     "releasedIn": "Released in {year}",
-    "searchLabel": "Search games by title, genre or ID",
-    "searchPlaceholder": "Enter a title, genre or ID",
+    "searchLabel": "Search games by title",
+    "searchPlaceholder": "Enter a game title",
     "sortAlgorithm": "Sorting algorithm",
     "insertionSort": "Insertion sort",
     "quickSort": "Quick sort",
     "mergeSort": "Merge sort",
     "resultCount": "{count} result(s)",
     "sortDuration": "Sort time: {duration} ms",
-    "noResults": "No games found. Try another search."
+    "noResults": "No games found. Try another search.",
+    "searching": "Searching...",
+    "searchError": "Search is temporarily unavailable. Please try again later."
   },
   "concept": {
     "eyebrow": "The idea",
@@ -70,13 +72,17 @@
       }
     }
   },
+  "catalog": {
+    "loading": "Loading game catalogue...",
+    "error": "Unable to load games. Check that the backend server is running."
+  },
   "footer": {
     "tagline": "The logbook for players.",
     "navTitle": "Navigation",
     "projectTitle": "Project",
     "projectSchool": "Student project — PA_3",
     "projectStatus": "Work in progress",
-    "coversNotice": "Official cover art shown for demonstration purposes until the video game API is connected.",
+    "coversNotice": "Official cover art shown for demonstration purposes.",
     "rights": "© {year} Replay — non-commercial student project."
   }
 }

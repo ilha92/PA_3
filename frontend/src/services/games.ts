@@ -1,4 +1,3 @@
-import { games } from '../data/games'
 import {
   insertionSort,
   mergeSort,
@@ -7,18 +6,39 @@ import {
 } from '../algorithms/sorting'
 import type { Game } from '../types/game'
 
-/**
- * Seul endroit a modifier le jour ou l'API de jeux video sera branchee :
- * remplacer le contenu des fonctions par un appel a
- * `${import.meta.env.VITE_API_URL}/games`.
- * Les composants, eux, continueront de recevoir des `Game[]` via leurs props.
- */
-export function getHeroGames(): Game[] {
-  return games
+const apiUrl = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api').replace(/\/$/, '')
+
+async function getApiData<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(`${apiUrl}${path}`, {
+    headers: { Accept: 'application/json' },
+    signal,
+  })
+
+  if (!response.ok) throw new Error('Game API request failed')
+
+  return response.json() as Promise<T>
 }
 
-export function getFeaturedGames(): Game[] {
-  return games.slice(0, 6)
+export async function getGames(): Promise<Game[]> {
+  const result = await getApiData<{ data: Game[] }>('/games')
+  return result.data
+}
+
+export async function searchGamesFromApi(query: string, signal?: AbortSignal): Promise<Game[]> {
+  const params = new URLSearchParams({ q: query })
+  const result = await getApiData<{ data: Game[] }>(`/games/search?${params}`, signal)
+  return result.data
+}
+
+export async function getGameBySlug(slug: string): Promise<Game | undefined> {
+  const response = await fetch(`${apiUrl}/games/${encodeURIComponent(slug)}`, {
+    headers: { Accept: 'application/json' },
+  })
+  if (response.status === 404) return undefined
+  if (!response.ok) throw new Error('Game API request failed')
+
+  const result = (await response.json()) as { data: Game }
+  return result.data
 }
 
 export function sortGames(
