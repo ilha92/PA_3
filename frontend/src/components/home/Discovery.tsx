@@ -14,14 +14,39 @@ export function Discovery(props: DiscoveryProps) {
   const { locale, t } = useI18n()
   const [query, setQuery] = createSignal('')
   const [algorithm, setAlgorithm] = createSignal<SortAlgorithm>('insertion')
+  const [selectedGenres, setSelectedGenres] = createSignal<string[]>([])
+  const [genreSearch, setGenreSearch] = createSignal('')
+  const [genresOpen, setGenresOpen] = createSignal(false)
   const [sortSelected, setSortSelected] = createSignal(false)
   const [results, setResults] = createSignal<Game[]>([])
   const [sortingTime, setSortingTime] = createSignal(0)
   const [isSearching, setIsSearching] = createSignal(false)
   const [searchFailed, setSearchFailed] = createSignal(false)
-  const showResults = () => query().trim() !== '' || sortSelected()
+  const showResults = () => query().trim() !== '' || selectedGenres().length > 0 || sortSelected()
   const featured = () => (showResults() ? undefined : props.games[0])
   const rest = () => (showResults() ? results() : props.games.slice(1, 6))
+  const genres = () =>
+    [...new Set(props.games.flatMap((game) => game.genres))].sort((firstGenre, secondGenre) =>
+      firstGenre.localeCompare(secondGenre, locale(), { sensitivity: 'base' }),
+    )
+  const visibleGenres = () => {
+    const searchText = genreSearch().trim().toLocaleLowerCase(locale())
+    return searchText
+      ? genres().filter((genre) => genre.toLocaleLowerCase(locale()).includes(searchText))
+      : genres()
+  }
+  const filterByGenre = (gameList: Game[], selected: string[], currentLocale: string) =>
+    selected.length > 0
+      ? gameList.filter((game) =>
+          game.genres.some(
+            (gameGenre) =>
+              selected.some(
+                (genre) =>
+                  gameGenre.localeCompare(genre, currentLocale, { sensitivity: 'base' }) === 0,
+              ),
+          ),
+        )
+      : gameList
   const featuredRating = () =>
     featured()?.rating?.toLocaleString(locale(), {
       minimumFractionDigits: 1,
@@ -30,12 +55,14 @@ export function Discovery(props: DiscoveryProps) {
 
   createEffect(() => {
     const currentQuery = query().trim()
+    const currentGenres = selectedGenres()
     const currentLocale = locale()
     const currentAlgorithm = algorithm()
     const startTime = performance.now()
 
     if (!currentQuery) {
-      const sortedGames = sortGames(props.games, currentAlgorithm, currentLocale)
+      const matchingGames = filterByGenre(props.games, currentGenres, currentLocale)
+      const sortedGames = sortGames(matchingGames, currentAlgorithm, currentLocale)
       setSortingTime(performance.now() - startTime)
       setResults(sortedGames)
       setIsSearching(false)
@@ -49,7 +76,8 @@ export function Discovery(props: DiscoveryProps) {
 
     searchGamesFromApi(currentQuery, controller.signal)
       .then((matchingGames) => {
-        const sortedGames = sortGames(matchingGames, currentAlgorithm, currentLocale)
+        const genreMatches = filterByGenre(matchingGames, currentGenres, currentLocale)
+        const sortedGames = sortGames(genreMatches, currentAlgorithm, currentLocale)
         setSortingTime(performance.now() - startTime)
         setResults(sortedGames)
       })
@@ -78,7 +106,7 @@ export function Discovery(props: DiscoveryProps) {
         <p class="text-mist max-w-xs text-sm/relaxed">{t('discovery.lead')}</p>
       </header>
 
-      <div class="mt-8 grid gap-4 md:grid-cols-[minmax(0,1fr)_16rem] md:items-end">
+      <div class="mt-8 grid gap-4 md:grid-cols-[minmax(0,1fr)_12rem_16rem] md:items-end">
         <label class="text-mist block text-sm font-medium">
           {t('discovery.searchLabel')}
           <input
@@ -89,6 +117,26 @@ export function Discovery(props: DiscoveryProps) {
             class="bg-deep border-edge focus:border-aqua mt-2 w-full rounded-md border px-4 py-3 outline-none transition"
           />
         </label>
+        <div>
+          <span class="text-mist block text-sm font-medium">{t('discovery.chooseGenres')}</span>
+          <button
+            type="button"
+            aria-expanded={genresOpen()}
+            aria-controls="genre-options"
+            onClick={() => setGenresOpen(!genresOpen())}
+            class="bg-deep border-edge focus:border-aqua mt-2 flex w-full items-center justify-between rounded-md border px-4 py-3 text-left outline-none transition"
+          >
+            <span>
+              {t('discovery.chooseGenres')}
+              <Show when={selectedGenres().length > 0}>
+                <span class="text-mist/60 ml-2">({selectedGenres().length})</span>
+              </Show>
+            </span>
+            <span class="text-mist/60" aria-hidden="true">
+              {genresOpen() ? '−' : '+'}
+            </span>
+          </button>
+        </div>
         <label class="text-mist block text-sm font-medium">
           {t('discovery.sortAlgorithm')}
           <select
@@ -105,6 +153,88 @@ export function Discovery(props: DiscoveryProps) {
           </select>
         </label>
       </div>
+
+      <Show when={genresOpen()}>
+        <fieldset
+          id="genre-options"
+          class="bg-deep border-edge mt-3 rounded-md border p-4"
+        >
+          <legend class="sr-only">{t('discovery.chooseGenres')}</legend>
+          <label class="sr-only" for="genre-search">
+            {t('discovery.searchGenre')}
+          </label>
+          <input
+            id="genre-search"
+            type="search"
+            value={genreSearch()}
+            onInput={(event) => setGenreSearch(event.currentTarget.value)}
+            placeholder={t('discovery.searchGenre')}
+            class="bg-deep border-edge focus:border-aqua w-full rounded-md border px-3 py-2 text-sm outline-none transition"
+          />
+
+          <Show when={selectedGenres().length > 0}>
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <For each={selectedGenres()}>
+                {(genre) => (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedGenres((current) => current.filter((selected) => selected !== genre))
+                    }
+                    aria-label={t('discovery.removeGenre', { genre })}
+                    class="border-edge text-mist hover:border-aqua inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs transition"
+                  >
+                    {genre}
+                    <span class="text-mist/60" aria-hidden="true">
+                      ×
+                    </span>
+                  </button>
+                )}
+              </For>
+              <button
+                type="button"
+                onClick={() => setSelectedGenres([])}
+                class="text-aqua px-1 text-xs underline"
+              >
+                {t('discovery.clearGenres')}
+              </button>
+            </div>
+          </Show>
+
+          <p class="text-mist/60 mt-3 text-xs" aria-live="polite">
+            {t('discovery.genreCount', { count: visibleGenres().length })}
+          </p>
+          <div class="mt-2 max-h-56 overflow-y-auto pr-2">
+            <Show
+              when={visibleGenres().length > 0}
+              fallback={<p class="text-mist/60 py-3 text-sm">{t('discovery.noGenreMatches')}</p>}
+            >
+              <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                <For each={visibleGenres()}>
+                  {(genre) => (
+                    <label class="text-mist flex cursor-pointer items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedGenres().includes(genre)}
+                        onChange={(event) => {
+                          const isSelected = event.currentTarget.checked
+                          setSelectedGenres((current) =>
+                            isSelected
+                              ? [...current, genre]
+                              : current.filter((selected) => selected !== genre),
+                          )
+                        }}
+                        class="accent-aqua size-4 shrink-0"
+                      />
+                      <span>{genre}</span>
+                    </label>
+                  )}
+                </For>
+              </div>
+            </Show>
+          </div>
+        </fieldset>
+      </Show>
 
       <Show when={showResults()}>
         <Show when={isSearching()}>
