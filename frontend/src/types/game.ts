@@ -1,6 +1,5 @@
 /**
- * Forme des donnees de jeu attendue par l'interface.
- * Les mocks de `src/data/games.ts` et la future API doivent respecter ce contrat.
+ * Forme des donnees de jeu retournee par l'API Laravel.
  */
 export type Game = {
   id: string

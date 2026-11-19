@@ -1,4 +1,4 @@
-import { createEffect } from 'solid-js'
+import { createEffect, createResource, Show } from 'solid-js'
 import { Concept } from '../components/home/Concept'
 import { Discovery } from '../components/home/Discovery'
 import { Hero } from '../components/home/Hero'
@@ -6,10 +6,11 @@ import { Marquee } from '../components/home/Marquee'
 import { Footer } from '../components/layout/Footer'
 import { Navbar } from '../components/layout/Navbar'
 import { useI18n } from '../i18n'
-import { getFeaturedGames, getHeroGames } from '../services/games'
+import { getGames } from '../services/games'
 
 export function Home() {
   const { t } = useI18n()
+  const [games] = createResource(getGames)
 
   createEffect(() => {
     document.title = t('meta.title')
@@ -30,10 +31,23 @@ export function Home() {
       <Navbar />
 
       <main id="main">
-        <Hero games={getHeroGames()} />
-        <Marquee />
-        <Discovery games={getHeroGames()} />
-        <Concept games={getFeaturedGames()} />
+        <Show
+          when={games()}
+          fallback={
+            <p class="shell py-24 text-center" role={games.error ? 'alert' : 'status'}>
+              {games.error ? t('catalog.error') : t('catalog.loading')}
+            </p>
+          }
+        >
+          {(catalog) => (
+            <>
+              <Hero games={catalog()} />
+              <Marquee />
+              <Discovery games={catalog()} />
+              <Concept games={catalog().slice(0, 4)} />
+            </>
+          )}
+        </Show>
       </main>
 
       <Footer />
