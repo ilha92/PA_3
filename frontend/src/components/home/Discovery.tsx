@@ -30,23 +30,13 @@ export function Discovery(props: DiscoveryProps) {
       firstGenre.localeCompare(secondGenre, locale(), { sensitivity: 'base' }),
     )
   const visibleGenres = () => {
-    const searchText = genreSearch().trim().toLocaleLowerCase(locale())
-    return searchText
-      ? genres().filter((genre) => genre.toLocaleLowerCase(locale()).includes(searchText))
-      : genres()
+    const searchText = genreSearch().trim().toLowerCase()
+    return genres().filter((genre) => genre.toLowerCase().includes(searchText))
   }
-  const filterByGenre = (gameList: Game[], selected: string[], currentLocale: string) =>
-    selected.length > 0
-      ? gameList.filter((game) =>
-          game.genres.some(
-            (gameGenre) =>
-              selected.some(
-                (genre) =>
-                  gameGenre.localeCompare(genre, currentLocale, { sensitivity: 'base' }) === 0,
-              ),
-          ),
-        )
-      : gameList
+  const filterByGenre = (gameList: Game[], selected: string[]) =>
+    gameList.filter(
+      (game) => selected.length === 0 || game.genres.some((genre) => selected.includes(genre)),
+    )
   const featuredRating = () =>
     featured()?.rating?.toLocaleString(locale(), {
       minimumFractionDigits: 1,
@@ -58,13 +48,16 @@ export function Discovery(props: DiscoveryProps) {
     const currentGenres = selectedGenres()
     const currentLocale = locale()
     const currentAlgorithm = algorithm()
-    const startTime = performance.now()
+
+    const updateResults = (gameList: Game[]) => {
+      const startTime = performance.now()
+      const filteredGames = filterByGenre(gameList, currentGenres)
+      setResults(sortGames(filteredGames, currentAlgorithm, currentLocale))
+      setSortingTime(performance.now() - startTime)
+    }
 
     if (!currentQuery) {
-      const matchingGames = filterByGenre(props.games, currentGenres, currentLocale)
-      const sortedGames = sortGames(matchingGames, currentAlgorithm, currentLocale)
-      setSortingTime(performance.now() - startTime)
-      setResults(sortedGames)
+      updateResults(props.games)
       setIsSearching(false)
       setSearchFailed(false)
       return
@@ -75,12 +68,7 @@ export function Discovery(props: DiscoveryProps) {
     setSearchFailed(false)
 
     searchGamesFromApi(currentQuery, controller.signal)
-      .then((matchingGames) => {
-        const genreMatches = filterByGenre(matchingGames, currentGenres, currentLocale)
-        const sortedGames = sortGames(genreMatches, currentAlgorithm, currentLocale)
-        setSortingTime(performance.now() - startTime)
-        setResults(sortedGames)
-      })
+      .then(updateResults)
       .catch(() => {
         if (!controller.signal.aborted) {
           setResults([])

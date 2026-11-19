@@ -34,7 +34,7 @@ function normalizeSearchText(value: string, locale: string): string {
 		.toLocaleLowerCase(locale)
 }
 
-export function searchGames(gameList: Game[], query: string, locale: string): Game[] {
+export function searchGames(gameList: Game[],   query: string, locale: string): Game[] {
 	const searchText = normalizeSearchText(query.trim(), locale)
 
 	return gameList.filter((game) => {
