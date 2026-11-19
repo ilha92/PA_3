@@ -1,5 +1,7 @@
 import { A, Route, Router } from '@solidjs/router'
+import { AuthProvider } from './auth'
 import { I18nProvider } from './i18n'
+import { Login, Register } from './pages/Auth'
 import { Home } from './pages/Home'
 import { JeuxDetail } from './pages/jeuxDetail'
 
@@ -17,11 +19,15 @@ function NotFound() {
 export default function App() {
   return (
     <I18nProvider>
-      <Router>
-        <Route path="/" component={Home} />
-        <Route path="/games/:slug" component={JeuxDetail} />
-        <Route path="*" component={NotFound} />
-      </Router>
+      <AuthProvider>
+        <Router>
+          <Route path="/" component={Home} />
+          <Route path="/games/:slug" component={JeuxDetail} />
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+          <Route path="*" component={NotFound} />
+        </Router>
+      </AuthProvider>
     </I18nProvider>
   )
 }
