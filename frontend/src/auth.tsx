@@ -18,6 +18,10 @@ type AuthContext = {
 
 const Auth = createContext<AuthContext>()
 
+function isAuthProblem(error: unknown): error is AuthProblem {
+  return ['invalid', 'taken', 'mismatch', 'throttle', 'unavailable'].includes(error as AuthProblem)
+}
+
 export function AuthProvider(props: { children: JSX.Element }) {
   const [user, setUser] = createSignal<AuthUser | null>(null)
   const [ready, setReady] = createSignal(false)
@@ -35,7 +39,7 @@ export function AuthProvider(props: { children: JSX.Element }) {
       setUser(await currentUser())
       return null
     } catch (error) {
-      return typeof error === 'string' ? error : 'unavailable'
+      return isAuthProblem(error) ? error : 'unavailable'
     }
   }
 
@@ -45,7 +49,7 @@ export function AuthProvider(props: { children: JSX.Element }) {
       setUser(await currentUser())
       return null
     } catch (error) {
-      return typeof error === 'string' ? error : 'unavailable'
+      return isAuthProblem(error) ? error : 'unavailable'
     }
   }
 
