@@ -15,6 +15,7 @@
     "journal": "Journal",
     "signIn": "Sign in",
     "signUp": "Sign up",
+    "signOut": "Sign out",
     "languageSwitch": "Change language",
     "primaryNav": "Main navigation"
   },
@@ -77,6 +78,34 @@
         "description": "Finished, dropped, waiting to be resumed: your library stays clear and searchable."
       }
     }
+  },
+  "auth": {
+    "signInMeta": "Sign in — Replay",
+    "signUpMeta": "Sign up — Replay",
+    "signInEyebrow": "Account",
+    "signInTitle": "Sign in",
+    "signInLead": "Pick up your game journal.",
+    "signUpEyebrow": "Account",
+    "signUpTitle": "Sign up",
+    "signUpLead": "Open your journal. A name, an email, a password.",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "passwordConfirmation": "Confirmation",
+    "submitSignIn": "Sign in",
+    "submitSignUp": "Create my account",
+    "switchToSignUp": "No account yet?",
+    "switchToSignIn": "Already have an account?",
+    "signUpLink": "Sign up",
+    "signInLink": "Sign in",
+    "nameRequired": "Enter your name.",
+    "emailRequired": "Enter a valid email.",
+    "passwordRequired": "The password must be at least 8 characters.",
+    "passwordMismatch": "The two passwords do not match.",
+    "emailTaken": "This email is already in use.",
+    "invalidCredentials": "Incorrect email or password.",
+    "throttle": "Too many attempts. Try again in a minute.",
+    "unavailable": "The authentication server is not responding."
   },
   "catalog": {
     "loading": "Loading game catalogue...",

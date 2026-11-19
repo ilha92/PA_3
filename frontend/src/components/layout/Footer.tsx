@@ -19,7 +19,7 @@ export function Footer() {
           <p class="eyebrow">{t('footer.navTitle')}</p>
           <ul class="mt-4 space-y-3">
             <li>
-              <NavLink label={t('navbar.home')} href="#top" />
+              <NavLink label={t('navbar.home')} href="/" />
             </li>
             <li>
               <NavLink label={t('navbar.explore')} />
@@ -28,7 +28,7 @@ export function Footer() {
               <NavLink label={t('navbar.journal')} />
             </li>
             <li>
-              <NavLink label={t('navbar.signIn')} />
+              <NavLink label={t('navbar.signIn')} href="/login" />
             </li>
           </ul>
         </nav>

@@ -54,9 +54,8 @@ export function Hero(props: HeroProps) {
             {t('hero.lead')}
           </p>
           <div class="mt-8 flex flex-wrap items-center gap-3">
-            <CtaButton label={t('hero.ctaPrimary')} />
+            <CtaButton label={t('hero.ctaPrimary')} href="/register" />
             <CtaButton label={t('hero.ctaSecondary')} variant="ghost" />
-            <span class="eyebrow ml-1">{t('common.soon')}</span>
           </div>
         </div>
       </div>

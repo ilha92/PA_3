@@ -15,6 +15,7 @@
     "journal": "Journal",
     "signIn": "Connexion",
     "signUp": "Inscription",
+    "signOut": "Déconnexion",
     "languageSwitch": "Changer de langue",
     "primaryNav": "Navigation principale"
   },
@@ -77,6 +78,34 @@
         "description": "Terminés, abandonnés, à reprendre : votre bibliothèque reste claire et consultable."
       }
     }
+  },
+  "auth": {
+    "signInMeta": "Connexion — Replay",
+    "signUpMeta": "Inscription — Replay",
+    "signInEyebrow": "Compte",
+    "signInTitle": "Connexion",
+    "signInLead": "Retrouve ton journal de jeu.",
+    "signUpEyebrow": "Compte",
+    "signUpTitle": "Inscription",
+    "signUpLead": "Ouvre ton journal. Un nom, un e-mail, un mot de passe.",
+    "name": "Nom",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "passwordConfirmation": "Confirmation",
+    "submitSignIn": "Se connecter",
+    "submitSignUp": "Créer mon compte",
+    "switchToSignUp": "Pas encore de compte ?",
+    "switchToSignIn": "Déjà un compte ?",
+    "signUpLink": "Inscription",
+    "signInLink": "Connexion",
+    "nameRequired": "Indique ton nom.",
+    "emailRequired": "Indique un e-mail valide.",
+    "passwordRequired": "Le mot de passe doit faire au moins 8 caractères.",
+    "passwordMismatch": "Les deux mots de passe ne correspondent pas.",
+    "emailTaken": "Cet e-mail est déjà utilisé.",
+    "invalidCredentials": "E-mail ou mot de passe incorrect.",
+    "throttle": "Trop de tentatives. Réessaie dans une minute.",
+    "unavailable": "Le serveur d'authentification ne répond pas."
   },
   "catalog": {
     "loading": "Chargement du catalogue...",
