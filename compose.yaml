@@ -4,15 +4,19 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-replay}
-      POSTGRES_USER: ${POSTGRES_USER:-replay}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-replay}
+      POSTGRES_DB: ${DB_DATABASE:-replay}
+      POSTGRES_USER: ${DB_USERNAME:-replay}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-replay}
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
+<<<<<<< HEAD
       - '${POSTGRES_PORT:-5433}:5432'
+=======
+      - '${POSTGRES_PORT:-5436}:5432'
+>>>>>>> 2c3d570 (feat : ajoutes des notes utilisateur sur le jeu)
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-replay} -d ${POSTGRES_DB:-replay}']
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME:-replay} -d ${DB_DATABASE:-replay}']
       interval: 5s
       retries: 10
 
@@ -20,17 +24,18 @@ services:
     build:
       context: .
       target: backend
-    # Ces variables priment sur backend/.env : dans Docker la base s'appelle "db".
+    # La connexion PostgreSQL utilise les mêmes variables que le fichier .env racine.
     environment:
-      DB_CONNECTION: pgsql
+      DB_CONNECTION: ${DB_CONNECTION:-pgsql}
       DB_HOST: db
       DB_PORT: 5432
-      DB_DATABASE: ${POSTGRES_DB:-replay}
-      DB_USERNAME: ${POSTGRES_USER:-replay}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-replay}
+      DB_DATABASE: ${DB_DATABASE:-replay}
+      DB_USERNAME: ${DB_USERNAME:-replay}
+      DB_PASSWORD: ${DB_PASSWORD:-replay}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
     volumes:
       - ./backend:/app
+      - ./.env:/app/.env
     ports:
       - '${BACKEND_PORT:-8000}:8000'
     depends_on:

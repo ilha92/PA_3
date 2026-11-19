@@ -18,6 +18,8 @@ class GameSearchController extends Controller
         $query = mb_strtolower(trim($validated['q']));
 
         $games = Game::query()
+            ->withAvg('ratings', 'score')
+            ->withCount('ratings')
             ->whereRaw('LOWER(title) LIKE ?', ["%{$query}%"])
             ->orderBy('title')
             ->limit(50)

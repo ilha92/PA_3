@@ -14,6 +14,9 @@ export type Game = {
   backgroundUrl?: string
   /** Note moyenne sur 5, absente tant que le jeu n'a pas ete note. */
   rating?: number
+  /** Moyenne des notes des utilisateurs connectes, absente sans avis. */
+  communityRating?: number | null
+  communityRatingCount?: number
   summary?: string
 }
 

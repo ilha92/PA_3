@@ -18,6 +18,11 @@ export function GameCard(props: GameCardProps) {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
     })
+  const communityRating = () =>
+    props.game.communityRating?.toLocaleString(locale(), {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })
 
   return (
     <article class="group">
@@ -33,14 +38,26 @@ export function GameCard(props: GameCardProps) {
 
         <div class="mt-4 flex items-baseline justify-between gap-3">
           <h3 class="font-display text-lg leading-tight font-semibold">{props.game.title}</h3>
-          <Show
-            when={rating()}
-            fallback={<span class="text-mist/60 text-xs">{t('discovery.noRating')}</span>}
-          >
-            <span class="text-aqua shrink-0 text-sm font-medium" title={t('discovery.ratingLabel')}>
-              ★ {rating()}
-            </span>
-          </Show>
+          <div class="flex shrink-0 flex-col items-end gap-1">
+            <Show when={rating()}>
+              <span class="text-aqua text-sm font-medium" title={t('discovery.ratingLabel')}>
+                ★ {rating()}
+              </span>
+            </Show>
+            <Show
+              when={communityRating()}
+              fallback={
+                <Show when={!rating()}>
+                  <span class="text-mist/60 text-xs">{t('discovery.noRating')}</span>
+                </Show>
+              }
+            >
+              <span class="text-aqua/80 text-xs" title={t('discovery.communityRatingLabel')}>
+                ★ {communityRating()}
+                <span class="text-mist/60 ml-1">({props.game.communityRatingCount ?? 0})</span>
+              </span>
+            </Show>
+          </div>
         </div>
 
         <p class="text-mist/70 mt-1.5 text-xs">

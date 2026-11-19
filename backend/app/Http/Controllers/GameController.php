@@ -10,12 +10,22 @@ class GameController extends Controller
 {
     public function index(): AnonymousResourceCollection
     {
-        return GameResource::collection(Game::query()->orderBy('id')->get());
+        $games = Game::query()
+            ->withAvg('ratings', 'score')
+            ->withCount('ratings')
+            ->orderBy('id')
+            ->get();
+
+        return GameResource::collection($games);
     }
 
     public function show(string $slug): GameResource
     {
-        $game = Game::query()->where('slug', $slug)->firstOrFail();
+        $game = Game::query()
+            ->withAvg('ratings', 'score')
+            ->withCount('ratings')
+            ->where('slug', $slug)
+            ->firstOrFail();
 
         return new GameResource($game);
     }
