@@ -13,7 +13,8 @@ WORKDIR /app
 EXPOSE 8000
 
 # Le code est monte en volume : on installe les dependances au demarrage.
-CMD ["sh", "-c", "composer install --no-interaction && php artisan serve --host=0.0.0.0 --port=8000"]
+# --no-reload : sinon `artisan serve` jette les variables Docker (DB_*) et retombe sur backend/.env.
+CMD ["sh", "-c", "composer install --no-interaction && php artisan serve --no-reload --host=0.0.0.0 --port=8000"]
 
 FROM node:22-alpine AS frontend
 
