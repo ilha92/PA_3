@@ -19,6 +19,10 @@ class GameResource extends JsonResource
             'coverUrl' => $this->cover_url,
             'backgroundUrl' => $this->background_url,
             'rating' => $this->rating,
+            'communityRating' => $this->ratings_avg_score === null
+                ? null
+                : round((float) $this->ratings_avg_score, 1),
+            'communityRatingCount' => (int) ($this->ratings_count ?? 0),
             'summary' => $this->summary,
         ];
     }

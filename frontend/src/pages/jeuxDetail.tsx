@@ -2,12 +2,17 @@ import { A, useNavigate, useParams } from '@solidjs/router'
 import { createResource, For, Show } from 'solid-js'
 import { Footer } from '../components/layout/Footer'
 import { Navbar } from '../components/layout/Navbar'
+import { GameRating } from '../components/ui/GameRating'
+import { useI18n } from '../i18n'
 import { getGameBySlug } from '../services/games'
 
 export function JeuxDetail() {
   const navigate = useNavigate()
   const params = useParams<{ slug: string }>()
-  const [game] = createResource(() => params.slug, getGameBySlug)
+  const { locale, t } = useI18n()
+  const [game, { refetch: refreshGame }] = createResource(() => params.slug, getGameBySlug)
+  const formatRating = (rating: number) =>
+    rating.toLocaleString(locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 
   return (
     <>
@@ -63,8 +68,27 @@ export function JeuxDetail() {
                     </For>
                   </ul>
                   <Show when={selectedGame().rating}>
-                    <p class="text-aqua mt-6">Note : {selectedGame().rating} / 5</p>
+                    <p class="text-aqua mt-6">
+                      {t('rating.catalogRating', { score: formatRating(selectedGame().rating ?? 0) })}
+                    </p>
                   </Show>
+                  <Show when={selectedGame().communityRating != null}>
+                    <p class="text-aqua mt-2">
+                      {t('rating.communityAverage', {
+                        score: formatRating(selectedGame().communityRating ?? 0),
+                      })}{' '}
+                      {t(
+                        (selectedGame().communityRatingCount ?? 0) === 1
+                          ? 'rating.communityVotesOne'
+                          : 'rating.communityVotesMany',
+                        { count: selectedGame().communityRatingCount ?? 0 },
+                      )}
+                    </p>
+                  </Show>
+                  <GameRating
+                    slug={selectedGame().slug}
+                    onRatingChange={() => void refreshGame()}
+                  />
                 </div>
               </div>
             </article>
