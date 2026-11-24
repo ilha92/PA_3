@@ -35,7 +35,7 @@ La commande copie 5 000 jeux en quelques secondes, les plus notés d'abord : jeu
 docker compose exec backend php artisan games:import --limit=20000
 ```
 
-Attention : `GET /api/games` renvoie tout le catalogue d'un coup, environ 1 Mo par tranche de 1 000 jeux.
+La taille du catalogue ne ralentit pas le site : `GET /api/games` est paginé (20 jeux, environ 20 Ko par page).
 
 Relancer la commande met à jour les jeux déjà présents (même slug) et ajoute les nouveaux. Elle retire les anciens jeux qui ne viennent pas d'IGDB, **seulement** s'ils n'ont aucune note.
 
@@ -60,7 +60,9 @@ Le frontend n'appelle jamais IGDB. Il appelle Laravel. La forme ci-dessous ne ch
 
 | Méthode | Route | Rôle |
 | --- | --- | --- |
-| `GET` | `/api/games` | Catalogue complet, trié par id. |
+| `GET` | `/api/games?page=1` | Catalogue paginé, 20 jeux par page, trié par id. |
+| `GET` | `/api/games?genres[]=Adventure&genres[]=Puzzle` | Jeux qui ont au moins un des genres demandés (paginé aussi). |
+| `GET` | `/api/genres` | Liste triée de tous les genres du catalogue : `{ "data": ["Adventure", ...] }`. |
 | `GET` | `/api/games/search?q=kingdom` | Recherche sur le titre. `q` est obligatoire, 100 caractères maximum. |
 | `GET` | `/api/games/{slug}` | Une fiche. 404 si le slug n'existe pas. |
 
@@ -84,6 +86,8 @@ Exemple de fiche :
   }
 }
 ```
+
+La liste paginée renvoie aussi `meta` (`current_page`, `last_page`, `total`, `per_page`) et `links`, au format standard de Laravel. Le frontend lit `data`, `meta.total` et `meta.last_page` dans `getGamePage()` (`frontend/src/services/games.ts`).
 
 `id` est l'id PostgreSQL, pas l'id IGDB. `coverUrl` est toujours rempli. `backgroundUrl`, `rating` et `summary` peuvent être `null`. `communityRating` et `communityRatingCount` viennent des notes Replay.
 

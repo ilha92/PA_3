@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/health', fn () => response()->json(['status' => 'ok']));
 Route::get('/games/search', GameSearchController::class);
 Route::get('/games', [GameController::class, 'index']);
+Route::get('/genres', [GameController::class, 'genres']);
 Route::get('/games/{slug}', [GameController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {

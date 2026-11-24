@@ -48,7 +48,8 @@ Routes disponibles :
 | Méthode | Route | Rôle |
 | --- | --- | --- |
 | `GET` | `/api/health` | Vérifie que l’API répond. |
-| `GET` | `/api/games` | Retourne le catalogue complet. |
+| `GET` | `/api/games?page=1&genres[]=Adventure` | Retourne le catalogue paginé (20 jeux par page), filtrable par genre. |
+| `GET` | `/api/genres` | Retourne la liste des genres du catalogue. |
 | `GET` | `/api/games/search?q=elden` | Recherche dans les titres; `q` est obligatoire et limité à 100 caractères. |
 | `GET` | `/api/games/{slug}` | Retourne la fiche d’un jeu identifié par son slug. |
 | `GET` | `/api/user` | Retourne l’utilisateur connecté via Sanctum. |
@@ -57,9 +58,9 @@ Les réponses de jeux sont mises au format frontend par `GameResource` (`release
 
 ## Recherche et genres
 
-La page d’accueil charge le catalogue avec `GET /api/games`. La recherche par nom appelle `GET /api/games/search`. Les fiches de jeu utilisent `GET /api/games/{slug}`.
+La page d’accueil charge la première page du catalogue avec `GET /api/games?page=1`, et le bouton « Voir plus de jeux » charge les suivantes. La recherche par nom appelle `GET /api/games/search`. Les fiches de jeu utilisent `GET /api/games/{slug}`.
 
-Le menu des genres est construit à partir des genres présents dans les jeux reçus de l’API. Il permet de rechercher un genre dans la liste et d’en sélectionner plusieurs. Un jeu est affiché s’il correspond à au moins un genre sélectionné. Quand un titre est aussi saisi, le frontend filtre par genre les résultats de la recherche API. Le tri (insertion, rapide ou fusion) reste exécuté dans le frontend.
+Le menu des genres est rempli par `GET /api/genres`. Il permet de rechercher un genre dans la liste et d’en sélectionner plusieurs. Un jeu est affiché s’il correspond à au moins un genre sélectionné ; ce filtre est fait côté serveur (`genres[]`). Quand un titre est aussi saisi, le frontend filtre par genre les résultats de la recherche API. Le tri (insertion, rapide ou fusion) reste exécuté dans le frontend, sur les jeux déjà chargés.
 
 ## Authentification
 

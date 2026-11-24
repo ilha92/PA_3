@@ -74,6 +74,26 @@ Le mur three.js de l'accueil affichait les jaquettes du catalogue. Avec IGDB, il
 - Les tests existants de recherche et de notation passent toujours.
 - [catalogue.md](catalogue.md) explique comment obtenir les clés et lancer l'import, et décrit les routes à utiliser.
 
+## Étape 5 : pagination
+
+Après l'import de 5 000 jeux, chaque rafraîchissement de l'accueil téléchargeait tout le catalogue (`GET /api/games`, environ 4,7 Mo), alors que la page n'en affiche qu'une poignée.
+
+| | Avant | Après |
+| --- | --- | --- |
+| Appel au chargement de l'accueil | `/api/games` : 5 000 jeux, ~4,7 Mo | `/api/games?page=1` : 20 jeux, ~19 Ko |
+| Liste des genres | calculée dans le navigateur à partir des 5 000 jeux | `/api/genres` : ~0,4 Ko |
+| Filtre par genre | dans le navigateur, sur la liste complète | côté serveur : `/api/games?genres[]=...` |
+
+Ce qui a changé :
+
+- **Backend** (`GameController`) : `index` utilise `paginate(20)` et accepte `genres[]`, une méthode `genres` renvoie la liste des genres, et une route `GET /api/genres` est ajoutée.
+- **Frontend** : `getGamePage(page, genres)` et `getGenres()` remplacent `getGames()` dans `services/games.ts`. L'accueil ne charge que la page 1. La section découverte charge les pages suivantes avec un bouton « Voir plus de jeux », traduit en français et en anglais.
+- **Tri** (insertion, rapide, fusion) : il reste dans le navigateur et s'applique aux jeux déjà chargés. Le temps affiché ne mesure plus que le tri lui-même, sans l'attente réseau.
+- **Recherche par titre** : inchangée, 50 résultats maximum.
+- **Test** : `GameSearchTest` couvre la pagination, le filtre par genre et `/api/genres`.
+
+Limite à connaître : quand un algorithme de tri est choisi, il trie les pages déjà chargées, pas tout le catalogue. C'est voulu : trier 5 000 jeux dans le navigateur reviendrait à les télécharger tous.
+
 ## Fichiers modifiés
 
 | Fichier | Changement |
@@ -86,7 +106,11 @@ Le mur three.js de l'accueil affichait les jaquettes du catalogue. Avec IGDB, il
 | `frontend/src/data/coverWall.json` | Nouveau : jaquettes du mur 3D. |
 | `frontend/src/components/home/Hero.tsx`, `CoverWall.tsx`, `lib/coverWall.ts` | Le mur lit le JSON au lieu du catalogue. |
 | `.env.example` | Ajout de `TWITCH_CLIENT_ID` et `TWITCH_CLIENT_SECRET`. |
-| `DOCUMENTATION_PROJET.md` | Premier démarrage : `games:import` remplace le seeder. || `documentation/catalogue.md` | Mode d'emploi et format de l'API. |
+| `DOCUMENTATION_PROJET.md` | Premier démarrage : `games:import` remplace le seeder. |
+| `backend/app/Http/Controllers/GameController.php`, `backend/routes/api.php` | Pagination, filtre par genre, route `/api/genres`. |
+| `backend/tests/Feature/GameSearchTest.php` | Test de la pagination et des genres. |
+| `frontend/src/services/games.ts`, `pages/Home.tsx`, `components/home/Discovery.tsx` | Chargement page par page et bouton « Voir plus ». |
+| `frontend/src/i18n/locales/fr.json`, `en.json` | Clé `discovery.loadMore`. || `documentation/catalogue.md` | Mode d'emploi et format de l'API. |
 
 Les fichiers de la notation (`GameRatingController`, `GameRating`, `GameRating.tsx`, `ratings.ts`) n'ont pas été modifiés.
 
@@ -109,7 +133,7 @@ Chacun peut créer sa propre application Twitch, ou l'équipe peut partager une 
 
 Par ordre d'importance.
 
-1. **L'accueil charge tout le catalogue d'un coup.** `GET /api/games` renvoie les 5 000 jeux, soit environ 4,7 Mo. C'est rapide en local, mais lourd en production (performances, Core Web Vitals, mobile). Il faut paginer cette route (par exemple `?page=1`, 40 jeux par page) et adapter l'accueil et le filtre par genre, qui travaille aujourd'hui sur la liste complète côté navigateur. Le filtre par genre devra sans doute passer côté serveur.
+1. ~~**L'accueil charge tout le catalogue d'un coup.**~~ **Réglé** (voir « Étape 5 : pagination »).
 2. **Doublon The Witcher 3.** L'ancienne fiche de démonstration (`the-witcher-3`, jaquette locale) a été conservée parce qu'elle a des notes, à côté de la fiche IGDB (`the-witcher-3-wild-hunt`). Il faut déplacer ces notes vers la fiche IGDB (mettre à jour `game_id` dans `game_ratings`, en gérant le cas d'un utilisateur qui a noté les deux), puis supprimer l'ancienne fiche.
 3. **Liens vers les anciens slugs.** Les slugs viennent maintenant d'IGDB (`the-witcher-3-wild-hunt` au lieu de `the-witcher-3`, par exemple). Un lien ou un favori vers un ancien slug renvoie 404.
 4. **Textes en anglais.** Les résumés et les noms de genres IGDB sont en anglais, alors que le site est en français et en anglais. Pistes : traduire les genres via les fichiers i18n (la liste est courte et fixe), et afficher un libellé « résumé en anglais » sur la fiche.

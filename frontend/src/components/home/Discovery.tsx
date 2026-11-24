@@ -1,6 +1,6 @@
-import { createEffect, createSignal, For, onCleanup, Show } from 'solid-js'
+import { createEffect, createResource, createSignal, For, onCleanup, Show } from 'solid-js'
 import { useI18n } from '../../i18n'
-import { searchGamesFromApi, sortGames } from '../../services/games'
+import { getGamePage, getGenres, searchGamesFromApi, sortGames } from '../../services/games'
 import type { SortAlgorithm } from '../../algorithms/sorting'
 import type { Game } from '../../types/game'
 import { GameCard } from '../ui/GameCard'
@@ -18,17 +18,26 @@ export function Discovery(props: DiscoveryProps) {
   const [genreSearch, setGenreSearch] = createSignal('')
   const [genresOpen, setGenresOpen] = createSignal(false)
   const [sortSelected, setSortSelected] = createSignal(false)
+  const [loaded, setLoaded] = createSignal<Game[]>([])
   const [results, setResults] = createSignal<Game[]>([])
+  const [page, setPage] = createSignal(1)
+  const [lastPage, setLastPage] = createSignal(1)
+  const [total, setTotal] = createSignal(0)
   const [sortingTime, setSortingTime] = createSignal(0)
   const [isSearching, setIsSearching] = createSignal(false)
   const [searchFailed, setSearchFailed] = createSignal(false)
+  const [allGenres] = createResource(getGenres)
   const showResults = () => query().trim() !== '' || selectedGenres().length > 0 || sortSelected()
   const featured = () => (showResults() ? undefined : props.games[0])
   const rest = () => (showResults() ? results() : props.games.slice(1, 6))
   const genres = () =>
-    [...new Set(props.games.flatMap((game) => game.genres))].sort((firstGenre, secondGenre) =>
+    [...(allGenres() ?? [])].sort((firstGenre, secondGenre) =>
       firstGenre.localeCompare(secondGenre, locale(), { sensitivity: 'base' }),
     )
+  const changeGenres = (update: (current: string[]) => string[]) => {
+    setSelectedGenres(update)
+    setPage(1)
+  }
   const visibleGenres = () => {
     const searchText = genreSearch().trim().toLocaleLowerCase(locale())
     return searchText
@@ -38,12 +47,11 @@ export function Discovery(props: DiscoveryProps) {
   const filterByGenre = (gameList: Game[], selected: string[], currentLocale: string) =>
     selected.length > 0
       ? gameList.filter((game) =>
-          game.genres.some(
-            (gameGenre) =>
-              selected.some(
-                (genre) =>
-                  gameGenre.localeCompare(genre, currentLocale, { sensitivity: 'base' }) === 0,
-              ),
+          game.genres.some((gameGenre) =>
+            selected.some(
+              (genre) =>
+                gameGenre.localeCompare(genre, currentLocale, { sensitivity: 'base' }) === 0,
+            ),
           ),
         )
       : gameList
@@ -57,33 +65,30 @@ export function Discovery(props: DiscoveryProps) {
     const currentQuery = query().trim()
     const currentGenres = selectedGenres()
     const currentLocale = locale()
-    const currentAlgorithm = algorithm()
-    const startTime = performance.now()
+    const currentPage = page()
 
-    if (!currentQuery) {
-      const matchingGames = filterByGenre(props.games, currentGenres, currentLocale)
-      const sortedGames = sortGames(matchingGames, currentAlgorithm, currentLocale)
-      setSortingTime(performance.now() - startTime)
-      setResults(sortedGames)
-      setIsSearching(false)
-      setSearchFailed(false)
-      return
-    }
+    if (!showResults()) return
 
     const controller = new AbortController()
     setIsSearching(true)
     setSearchFailed(false)
 
-    searchGamesFromApi(currentQuery, controller.signal)
-      .then((matchingGames) => {
-        const genreMatches = filterByGenre(matchingGames, currentGenres, currentLocale)
-        const sortedGames = sortGames(genreMatches, currentAlgorithm, currentLocale)
-        setSortingTime(performance.now() - startTime)
-        setResults(sortedGames)
+    const request = currentQuery
+      ? searchGamesFromApi(currentQuery, controller.signal).then((games) => {
+          const matches = filterByGenre(games, currentGenres, currentLocale)
+          return { games: matches, total: matches.length, lastPage: 1 }
+        })
+      : getGamePage(currentPage, currentGenres, controller.signal)
+
+    request
+      .then((result) => {
+        setLoaded((current) => (currentPage === 1 ? result.games : [...current, ...result.games]))
+        setTotal(result.total)
+        setLastPage(result.lastPage)
       })
       .catch(() => {
         if (!controller.signal.aborted) {
-          setResults([])
+          setLoaded([])
           setSearchFailed(true)
         }
       })
@@ -92,6 +97,14 @@ export function Discovery(props: DiscoveryProps) {
       })
 
     onCleanup(() => controller.abort())
+  })
+
+  createEffect(() => {
+    const games = loaded()
+    const startTime = performance.now()
+    const sortedGames = sortGames(games, algorithm(), locale())
+    setSortingTime(performance.now() - startTime)
+    setResults(sortedGames)
   })
 
   return (
@@ -112,9 +125,12 @@ export function Discovery(props: DiscoveryProps) {
           <input
             type="search"
             value={query()}
-            onInput={(event) => setQuery(event.currentTarget.value)}
+            onInput={(event) => {
+              setQuery(event.currentTarget.value)
+              setPage(1)
+            }}
             placeholder={t('discovery.searchPlaceholder')}
-            class="bg-deep border-edge focus:border-aqua mt-2 w-full rounded-md border px-4 py-3 outline-none transition"
+            class="bg-deep border-edge focus:border-aqua mt-2 w-full rounded-md border px-4 py-3 transition outline-none"
           />
         </label>
         <div>
@@ -124,7 +140,7 @@ export function Discovery(props: DiscoveryProps) {
             aria-expanded={genresOpen()}
             aria-controls="genre-options"
             onClick={() => setGenresOpen(!genresOpen())}
-            class="bg-deep border-edge focus:border-aqua mt-2 flex w-full items-center justify-between rounded-md border px-4 py-3 text-left outline-none transition"
+            class="bg-deep border-edge focus:border-aqua mt-2 flex w-full items-center justify-between rounded-md border px-4 py-3 text-left transition outline-none"
           >
             <span>
               {t('discovery.chooseGenres')}
@@ -145,7 +161,7 @@ export function Discovery(props: DiscoveryProps) {
               setAlgorithm(event.currentTarget.value as SortAlgorithm)
               setSortSelected(true)
             }}
-            class="bg-deep border-edge focus:border-aqua mt-2 w-full rounded-md border px-4 py-3 outline-none transition"
+            class="bg-deep border-edge focus:border-aqua mt-2 w-full rounded-md border px-4 py-3 transition outline-none"
           >
             <option value="insertion">{t('discovery.insertionSort')}</option>
             <option value="quick">{t('discovery.quickSort')}</option>
@@ -155,10 +171,7 @@ export function Discovery(props: DiscoveryProps) {
       </div>
 
       <Show when={genresOpen()}>
-        <fieldset
-          id="genre-options"
-          class="bg-deep border-edge mt-3 rounded-md border p-4"
-        >
+        <fieldset id="genre-options" class="bg-deep border-edge mt-3 rounded-md border p-4">
           <legend class="sr-only">{t('discovery.chooseGenres')}</legend>
           <label class="sr-only" for="genre-search">
             {t('discovery.searchGenre')}
@@ -169,7 +182,7 @@ export function Discovery(props: DiscoveryProps) {
             value={genreSearch()}
             onInput={(event) => setGenreSearch(event.currentTarget.value)}
             placeholder={t('discovery.searchGenre')}
-            class="bg-deep border-edge focus:border-aqua w-full rounded-md border px-3 py-2 text-sm outline-none transition"
+            class="bg-deep border-edge focus:border-aqua w-full rounded-md border px-3 py-2 text-sm transition outline-none"
           />
 
           <Show when={selectedGenres().length > 0}>
@@ -179,7 +192,7 @@ export function Discovery(props: DiscoveryProps) {
                   <button
                     type="button"
                     onClick={() =>
-                      setSelectedGenres((current) => current.filter((selected) => selected !== genre))
+                      changeGenres((current) => current.filter((selected) => selected !== genre))
                     }
                     aria-label={t('discovery.removeGenre', { genre })}
                     class="border-edge text-mist hover:border-aqua inline-flex items-center gap-2 rounded-md border px-2.5 py-1 text-xs transition"
@@ -193,7 +206,7 @@ export function Discovery(props: DiscoveryProps) {
               </For>
               <button
                 type="button"
-                onClick={() => setSelectedGenres([])}
+                onClick={() => changeGenres(() => [])}
                 class="text-aqua px-1 text-xs underline"
               >
                 {t('discovery.clearGenres')}
@@ -218,7 +231,7 @@ export function Discovery(props: DiscoveryProps) {
                         checked={selectedGenres().includes(genre)}
                         onChange={(event) => {
                           const isSelected = event.currentTarget.checked
-                          setSelectedGenres((current) =>
+                          changeGenres((current) =>
                             isSelected
                               ? [...current, genre]
                               : current.filter((selected) => selected !== genre),
@@ -244,7 +257,7 @@ export function Discovery(props: DiscoveryProps) {
         </Show>
         <Show when={!isSearching() && !searchFailed()}>
           <p class="text-mist/60 mt-3 text-sm" role="status" aria-live="polite">
-            {t('discovery.resultCount', { count: results().length })}
+            {t('discovery.resultCount', { count: total() })}
           </p>
         </Show>
         <p class="text-mist/60 mt-1 text-sm" aria-live="polite">
@@ -299,6 +312,19 @@ export function Discovery(props: DiscoveryProps) {
           )}
         </For>
       </ul>
+
+      <Show when={showResults() && !searchFailed() && page() < lastPage()}>
+        <div class="mt-12 text-center">
+          <button
+            type="button"
+            disabled={isSearching()}
+            onClick={() => setPage(page() + 1)}
+            class="border-edge text-mist hover:border-aqua rounded-md border px-5 py-2.5 text-sm transition disabled:opacity-50"
+          >
+            {isSearching() ? t('discovery.searching') : t('discovery.loadMore')}
+          </button>
+        </div>
+      </Show>
 
       <Show when={showResults() && !isSearching() && !searchFailed() && results().length === 0}>
         <p class="text-mist mt-12 text-center" role="status">

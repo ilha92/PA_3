@@ -51,6 +51,40 @@ class GameSearchTest extends TestCase
             ->assertJsonValidationErrors('q');
     }
 
+    public function test_it_paginates_games_filters_by_genre_and_lists_genres(): void
+    {
+        foreach (range(1, 21) as $number) {
+            Game::create([
+                'slug' => "jeu-{$number}",
+                'title' => "Jeu {$number}",
+                'release_year' => 2020,
+                'developer' => 'Studio',
+                'genres' => $number === 21 ? ['Puzzle'] : ['Action', 'Adventure'],
+                'cover_url' => '/covers/placeholder.svg',
+            ]);
+        }
+
+        $this->getJson('/api/games')
+            ->assertOk()
+            ->assertJsonCount(20, 'data')
+            ->assertJsonPath('meta.total', 21)
+            ->assertJsonPath('meta.last_page', 2);
+
+        $this->getJson('/api/games?page=2')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.slug', 'jeu-21');
+
+        $this->getJson('/api/games?genres[]=Puzzle')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.slug', 'jeu-21');
+
+        $this->getJson('/api/genres')
+            ->assertOk()
+            ->assertExactJson(['data' => ['Action', 'Adventure', 'Puzzle']]);
+    }
+
     public function test_it_lists_games_and_returns_a_game_by_slug(): void
     {
         Game::create([

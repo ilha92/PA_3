@@ -1,9 +1,4 @@
-import {
-  insertionSort,
-  mergeSort,
-  quickSort,
-  type SortAlgorithm,
-} from '../algorithms/sorting'
+import { insertionSort, mergeSort, quickSort, type SortAlgorithm } from '../algorithms/sorting'
 import type { Game } from '../types/game'
 
 const apiUrl = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api').replace(/\/$/, '')
@@ -19,8 +14,24 @@ async function getApiData<T>(path: string, signal?: AbortSignal): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export async function getGames(): Promise<Game[]> {
-  const result = await getApiData<{ data: Game[] }>('/games')
+export type GamePage = { games: Game[]; total: number; lastPage: number }
+
+export async function getGamePage(
+  page = 1,
+  genres: string[] = [],
+  signal?: AbortSignal,
+): Promise<GamePage> {
+  const params = new URLSearchParams({ page: String(page) })
+  genres.forEach((genre) => params.append('genres[]', genre))
+  const result = await getApiData<{
+    data: Game[]
+    meta: { total: number; last_page: number }
+  }>(`/games?${params}`, signal)
+  return { games: result.data, total: result.meta.total, lastPage: result.meta.last_page }
+}
+
+export async function getGenres(): Promise<string[]> {
+  const result = await getApiData<{ data: string[] }>('/genres')
   return result.data
 }
 
@@ -41,11 +52,7 @@ export async function getGameBySlug(slug: string): Promise<Game | undefined> {
   return result.data
 }
 
-export function sortGames(
-  gameList: Game[],
-  algorithm: SortAlgorithm,
-  locale: string,
-): Game[] {
+export function sortGames(gameList: Game[], algorithm: SortAlgorithm, locale: string): Game[] {
   const compareByTitle = (firstGame: Game, secondGame: Game) =>
     firstGame.title.localeCompare(secondGame.title, locale, { sensitivity: 'base' })
 
