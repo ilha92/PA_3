@@ -54,9 +54,9 @@ function spring(progress: number): number {
 
 /**
  * Monte la scene 3D sur un canvas existant et renvoie sa fonction de nettoyage.
- * Les URLs des jaquettes viennent des donnees : rien n'est code en dur ici.
+ * Les URLs viennent de `data/coverWall.json` : ce fichier ne sert qu'a ce mur.
  */
-export function createCoverWall(canvas: HTMLCanvasElement, covers: string[]): () => void {
+export function createCoverWall(canvas: HTMLCanvasElement, covers: readonly string[]): () => void {
   const scene = new Scene()
   const camera = new PerspectiveCamera(WALL.fieldOfView, 1, 0.1, 100)
   camera.position.z = WALL.cameraZ

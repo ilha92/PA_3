@@ -2,7 +2,7 @@ import { onCleanup, onMount } from 'solid-js'
 
 type CoverWallProps = {
   /** URLs issues des donnees de jeu, dans l'ordre d'apparition. */
-  covers: string[]
+  covers: readonly string[]
   label: string
 }
 
