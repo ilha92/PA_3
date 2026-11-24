@@ -53,6 +53,7 @@
     "quickSort": "Quick sort",
     "mergeSort": "Merge sort",
     "resultCount": "{count} result(s)",
+    "loadMore": "Show more games",
     "sortDuration": "Sort time: {duration} ms",
     "noResults": "No games found. Try another search.",
     "searching": "Searching...",

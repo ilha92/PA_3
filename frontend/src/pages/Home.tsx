@@ -6,11 +6,11 @@ import { Marquee } from '../components/home/Marquee'
 import { Footer } from '../components/layout/Footer'
 import { Navbar } from '../components/layout/Navbar'
 import { useI18n } from '../i18n'
-import { getGames } from '../services/games'
+import { getGamePage } from '../services/games'
 
 export function Home() {
   const { t } = useI18n()
-  const [games] = createResource(getGames)
+  const [games] = createResource(async () => (await getGamePage()).games)
 
   createEffect(() => {
     document.title = t('meta.title')
