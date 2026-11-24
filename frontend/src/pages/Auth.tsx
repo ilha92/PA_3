@@ -88,115 +88,119 @@ function AuthForm(props: { mode: Mode }) {
     navigate('/', { replace: true })
   }
 
-  return (
-    <>
-      <Navbar />
-      <main class="shell flex min-h-svh items-center py-28">
-        <div class="panel mx-auto w-full max-w-md px-8 py-10">
-          <p class="eyebrow">{t(isRegister() ? 'auth.signUpEyebrow' : 'auth.signInEyebrow')}</p>
-          <h1 class="font-display text-heading mt-3 font-semibold">
-            {t(isRegister() ? 'auth.signUpTitle' : 'auth.signInTitle')}
-          </h1>
-          <p class="text-mist mt-3 text-sm/relaxed">
-            {t(isRegister() ? 'auth.signUpLead' : 'auth.signInLead')}
-          </p>
+return (
+  <>
+    <Navbar />
+    <main class="shell flex min-h-svh items-center py-28">
+      <div class="panel mx-auto w-full max-w-md px-8 py-10">
+        <p class="eyebrow">{t(isRegister() ? 'auth.signUpEyebrow' : 'auth.signInEyebrow')}</p>
+        <h1 class="font-display text-heading mt-3 font-semibold">
+          {t(isRegister() ? 'auth.signUpTitle' : 'auth.signInTitle')}
+        </h1>
+        <p class="text-mist mt-3 text-sm/relaxed">
+          {t(isRegister() ? 'auth.signUpLead' : 'auth.signInLead')}
+        </p>
 
-          <form class="mt-8 space-y-5" onSubmit={(event) => void submit(event)}>
-            <Show when={isRegister()}>
-              <label class="block">
-                <span class="text-mist mb-2 block text-xs font-medium tracking-[0.16em] uppercase">
-                  {t('auth.name')}
-                </span>
-                <input
-                  class={fieldClass}
-                  type="text"
-                  name="name"
-                  autocomplete="name"
-                  required
-                  value={name()}
-                  onInput={(event) => setName(event.currentTarget.value)}
-                />
-              </label>
-            </Show>
-
+        <form class="mt-8 space-y-5" onSubmit={(event) => void submit(event)}>
+          <Show when={isRegister()}>
             <label class="block">
               <span class="text-mist mb-2 block text-xs font-medium tracking-[0.16em] uppercase">
-                {t('auth.email')}
+                {t('auth.name')}
               </span>
               <input
                 class={fieldClass}
-                type="email"
-                name="email"
-                autocomplete="email"
+                type="text"
+                name="name"
+                autocomplete="name"
+                placeholder={t('Nom')}
                 required
-                value={email()}
-                onInput={(event) => setEmail(event.currentTarget.value)}
+                value={name()}
+                onInput={(event) => setName(event.currentTarget.value)}
               />
             </label>
+          </Show>
 
+          <label class="block">
+            <span class="text-mist mb-2 block text-xs font-medium tracking-[0.16em] uppercase">
+              {t('auth.email')}
+            </span>
+            <input
+              class={fieldClass}
+              type="email"
+              name="email"
+              autocomplete="email"
+              placeholder={t('Votre adresse email')}
+              required
+              value={email()}
+              onInput={(event) => setEmail(event.currentTarget.value)}
+            />
+          </label>
+
+          <label class="block">
+            <span class="text-mist mb-2 block text-xs font-medium tracking-[0.16em] uppercase">
+              {t('auth.password')}
+            </span>
+            <input
+              class={fieldClass}
+              type="password"
+              name="password"
+              autocomplete={isRegister() ? 'new-password' : 'current-password'}
+              placeholder={t('Mot de passe')}
+              required
+              minLength={8}
+              value={password()}
+              onInput={(event) => setPassword(event.currentTarget.value)}
+            />
+          </label>
+
+          <Show when={isRegister()}>
             <label class="block">
               <span class="text-mist mb-2 block text-xs font-medium tracking-[0.16em] uppercase">
-                {t('auth.password')}
+                {t('auth.passwordConfirmation')}
               </span>
               <input
                 class={fieldClass}
                 type="password"
-                name="password"
-                autocomplete={isRegister() ? 'new-password' : 'current-password'}
+                name="password_confirmation"
+                autocomplete="new-password"
+                placeholder={t('Confirmation du mot de passe')}
                 required
                 minLength={8}
-                value={password()}
-                onInput={(event) => setPassword(event.currentTarget.value)}
+                value={confirmation()}
+                onInput={(event) => setConfirmation(event.currentTarget.value)}
               />
             </label>
+          </Show>
 
-            <Show when={isRegister()}>
-              <label class="block">
-                <span class="text-mist mb-2 block text-xs font-medium tracking-[0.16em] uppercase">
-                  {t('auth.passwordConfirmation')}
-                </span>
-                <input
-                  class={fieldClass}
-                  type="password"
-                  name="password_confirmation"
-                  autocomplete="new-password"
-                  required
-                  minLength={8}
-                  value={confirmation()}
-                  onInput={(event) => setConfirmation(event.currentTarget.value)}
-                />
-              </label>
-            </Show>
+          <Show when={problem()}>
+            <p class="text-sun text-sm" role="alert">
+              {problemMessage()}
+            </p>
+          </Show>
 
-            <Show when={problem()}>
-              <p class="text-sun text-sm" role="alert">
-                {problemMessage()}
-              </p>
-            </Show>
+          <button
+            type="submit"
+            class="from-aqua to-azure text-deep font-display rounded-pill hover:shadow-glow w-full bg-gradient-to-b px-6 py-3 text-sm font-semibold transition duration-300 disabled:opacity-60"
+            disabled={pending()}
+          >
+            {t(isRegister() ? 'auth.submitSignUp' : 'auth.submitSignIn')}
+          </button>
+        </form>
 
-            <button
-              type="submit"
-              class="from-aqua to-azure text-deep font-display rounded-pill hover:shadow-glow w-full bg-gradient-to-b px-6 py-3 text-sm font-semibold transition duration-300 disabled:opacity-60"
-              disabled={pending()}
-            >
-              {t(isRegister() ? 'auth.submitSignUp' : 'auth.submitSignIn')}
-            </button>
-          </form>
-
-          <p class="text-mist mt-6 text-sm">
-            {t(isRegister() ? 'auth.switchToSignIn' : 'auth.switchToSignUp')}{' '}
-            <A
-              href={isRegister() ? '/login' : '/register'}
-              class="text-aqua hover:text-foam transition-colors"
-            >
-              {t(isRegister() ? 'auth.signInLink' : 'auth.signUpLink')}
-            </A>
-          </p>
-        </div>
-      </main>
-      <Footer />
-    </>
-  )
+        <p class="text-mist mt-6 text-sm">
+          {t(isRegister() ? 'auth.switchToSignIn' : 'auth.switchToSignUp')}{' '}
+          <A
+            href={isRegister() ? '/login' : '/register'}
+            class="text-aqua hover:text-foam transition-colors"
+          >
+            {t(isRegister() ? 'auth.signInLink' : 'auth.signUpLink')}
+          </A>
+        </p>
+      </div>
+    </main>
+    <Footer />
+  </>
+)
 }
 
 export function Login() {
