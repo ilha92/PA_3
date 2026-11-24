@@ -20,7 +20,7 @@ docker compose up -d --build
 docker compose exec backend php artisan key:generate
 docker compose restart backend
 docker compose exec backend php artisan migrate --force
-docker compose exec backend php artisan db:seed --class=GameSeeder --force
+docker compose exec backend php artisan games:import
 ```
 
 La génération de clé est nécessaire une seule fois après la création du `.env`. Le redémarrage du backend lui fait relire cette clé. Ne remplace pas ensuite une clé déjà utilisée sans raison : elle sert notamment au chiffrement des sessions.
@@ -37,11 +37,11 @@ Si le `Dockerfile` ou les dépendances d’image changent, reconstruis le servic
 docker compose up -d --build backend
 ```
 
-Le seeder ajoute les jeux de démonstration et peut être relancé sans créer de doublons. Il ne faut pas utiliser `docker compose down -v` sauf si tu veux supprimer aussi le volume PostgreSQL et les données locales.
+`games:import` copie des jeux IGDB dans PostgreSQL. Il faut `TWITCH_CLIENT_ID` et `TWITCH_CLIENT_SECRET` dans le `.env` racine (voir [documentation/catalogue.md](documentation/catalogue.md)). On peut le relancer pour mettre à jour le catalogue. Il ne faut pas utiliser `docker compose down -v` sauf si tu veux supprimer aussi le volume PostgreSQL et les données locales.
 
 ## Catalogue des jeux
 
-Les jeux sont stockés dans PostgreSQL. La migration `backend/database/migrations/2026_11_12_000000_create_games_table.php` crée la table, le modèle est `App\\Models\\Game`, et `GameSeeder` ajoute les données de démonstration.
+Les jeux sont stockés dans PostgreSQL. La migration `backend/database/migrations/2026_11_12_000000_create_games_table.php` crée la table, le modèle est `App\Models\Game`, et `php artisan games:import` copie le catalogue depuis IGDB. Le détail de cette copie et le contrat de l'API locale sont dans [documentation/catalogue.md](documentation/catalogue.md).
 
 Routes disponibles :
 

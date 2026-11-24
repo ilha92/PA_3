@@ -1,5 +1,6 @@
 import { Show, createSignal, onCleanup, onMount } from 'solid-js'
 import { BRAND } from '../../data/brand'
+import coverWall from '../../data/coverWall.json'
 import { useI18n } from '../../i18n'
 import type { Game } from '../../types/game'
 import { CtaButton } from '../ui/CtaButton'
@@ -30,10 +31,7 @@ export function Hero(props: HeroProps) {
         when={!flat()}
         fallback={<CoverGrid games={props.games.slice(0, 15)} label={t('hero.coversLabel')} />}
       >
-        <CoverWall
-          covers={props.games.map((game) => game.coverUrl)}
-          label={t('hero.coversLabel')}
-        />
+        <CoverWall covers={coverWall} label={t('hero.coversLabel')} />
       </Show>
 
       <div class="hero-vignette pointer-events-none absolute inset-0 z-10" />
